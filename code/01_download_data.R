@@ -4,6 +4,9 @@
 library(GEOquery)
 set.seed(123)
 
+# data folder eka nathnam hadanawa
+dir.create("data", showWarnings = FALSE)
+
 gse <- getGEO("GSE51808", GSEMatrix = TRUE)[[1]]
 
 expr <- exprs(gse)   # probes x samples
