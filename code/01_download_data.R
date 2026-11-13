@@ -1,16 +1,16 @@
 # 01_download_data.R
-# Download dengue patient blood expression dataset GSE51808 from GEO
+# Download the dengue patient blood expression dataset GSE51808 from GEO
 
 library(GEOquery)
-set.seed(123)
+set.seed(123)   # reproducibility
 
-# data folder eka nathnam hadanawa
+# Create the data folder if it does not exist
 dir.create("data", showWarnings = FALSE)
 
 gse <- getGEO("GSE51808", GSEMatrix = TRUE)[[1]]
 
-expr <- exprs(gse)   # probes x samples
-meta <- pData(gse)   # sample information
+expr <- exprs(gse)   # expression matrix: probes x samples
+meta <- pData(gse)   # sample metadata
 
 cat("Probes:", nrow(expr), "\n")
 cat("Samples:", ncol(expr), "\n")
@@ -18,4 +18,5 @@ cat("Platform:", annotation(gse), "\n")
 print(colnames(meta))
 print(head(meta[, 1:5]))
 
+# Save the raw dataset for the next scripts
 saveRDS(gse, "data/GSE51808.rds")

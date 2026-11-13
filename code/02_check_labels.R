@@ -1,24 +1,24 @@
 # 02_check_labels.R
-# Check sample labels before QC and analysis
+# Check the sample labels before QC and analysis
 
 library(GEOquery)
 
 gse  <- readRDS("data/GSE51808.rds")
 meta <- pData(gse)
 
-# print() use karanawa, source() walin ewa penna
+# print() is used so the tables are shown when the script is run with source()
 print(table(meta$`infection:ch1`, useNA = "ifany"))
 print(table(meta$`status:ch1`, useNA = "ifany"))
 print(table(meta$`tissue:ch1`, useNA = "ifany"))
 
-# infection saha status ekata ekka
+# Infection vs status
 print(table(meta$`infection:ch1`, meta$`status:ch1`, useNA = "ifany"))
 
-# unique patients kiyak da
+# Number of unique patients/subjects
 print(length(unique(meta$`subject id:ch1`)))
 
-# titles walin groups balanna (control thiyenawada)
+# Group names taken from the sample titles (to confirm the controls)
 print(table(sub(" Patient.*", "", meta$title)))
 
-# expression values log2 da balanna
+# Check the value range (a max of about 15-16 means data is already log2)
 print(summary(as.vector(exprs(gse))))
