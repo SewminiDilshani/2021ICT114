@@ -1,0 +1,110 @@
+---
+title: "Host blood transcriptome in dengue: differential expression, GO enrichment and SVM classification (GSE51808)"
+author: "2021ICT114"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+# Run all chunks from the project root folder (one level above code/)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      collapse = TRUE)
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+set.seed(123)
+```
+
+# Overview
+
+This notebook runs the full analysis pipeline for the public dataset
+**GEO GSE51808** (whole blood microarray, dengue patients and healthy controls).
+Each step is a script in the `code/` folder. The scripts save figures to
+`figures/` and result tables to `results/`.
+
+# Data import
+
+The raw dataset is downloaded from GEO only if it is not already in `data/`.
+
+```{r import}
+if (!file.exists("data/GSE51808.rds")) source("code/01_download_data.R")
+gse <- readRDS("data/GSE51808.rds")
+cat("Probes:", nrow(Biobase::exprs(gse)),
+    "| Samples:", ncol(Biobase::exprs(gse)), "\n")
+```
+
+# Sample labels
+
+```{r labels}
+source("code/02_check_labels.R")
+```
+
+# Quality control and cleaning
+
+```{r qc}
+source("code/03_qc_cleaning.R")
+```
+
+![Expression distribution per sample](../figures/fig1_boxplot_all_samples.png)
+
+![Density of expression values](../figures/fig2_density_all_samples.png)
+
+# Exploratory data analysis
+
+```{r eda}
+source("code/04_eda.R")
+```
+
+![PCA of Control, DF and DHF samples](../figures/fig3_pca_main.png)
+
+![PCA including convalescent samples](../figures/fig4_pca_all.png)
+
+![Sample-to-sample correlation](../figures/fig5_sample_correlation.png)
+
+![Top 50 most variable probes](../figures/fig6_heatmap_top50.png)
+
+# Differential expression (limma)
+
+```{r limma}
+source("code/05_limma.R")
+```
+
+![Volcano plot: dengue vs control](../figures/fig7_volcano_dengue_vs_control.png)
+
+```{r limma-table}
+res <- read.csv("results/DE_dengue_vs_control.csv")
+knitr::kable(head(res[, c("Gene", "logFC", "AveExpr", "adj.P.Val")], 15),
+             digits = 3, caption = "Top 15 differentially expressed probes")
+```
+
+# GO enrichment (Biological Process)
+
+```{r go}
+source("code/06_enrichment.R")
+```
+
+![GO terms enriched in genes up in dengue](../figures/fig8_GO_up.png)
+
+![GO terms enriched in genes down in dengue](../figures/fig9_GO_down.png)
+
+# SVM classification (Control vs Dengue)
+
+Feature selection is done inside each cross-validation fold, so test samples
+never influence the selected genes.
+
+```{r svm}
+source("code/07_classification.R")
+```
+
+![ROC curve](../figures/fig10_roc_curve.png)
+
+![Confusion matrix](../figures/fig11_confusion_matrix.png)
+
+# Session information
+
+```{r session}
+sessionInfo()
+```
